@@ -1,0 +1,115 @@
+/* Active track number circle */
+.active-num {
+  background: #E17858 !important;
+  color: #fff !important;
+}
+.track-list {
+  scrollbar-width: none; /* Firefox */
+}
+.track-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+/* Bakelitt style */
+.bakelitt {
+  background: #E9E3D2;
+  border: 2px solid #2A7B83;
+  color: #16213E;
+  box-shadow: 0 2px 0 #9F9C91;
+  padding: 1rem;
+  transition: transform 0.25s cubic-bezier(.4,1.6,.4,1), box-shadow 0.25s;
+  overflow: hidden;
+  will-change: transform;
+  width: 100%;
+}
+.bakelitt .num {
+  background: #2A7B83;
+  color: #F4ECE2;
+}
+
+.bakelitt:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 24px -4px #9F9C91, 0 2px 0 #9F9C91;
+}
+
+/* Hi-Fi Glow style */
+.glow {
+  background: #2A7B83;
+  box-shadow: 0 0 0 2px #F5EDE2, 0 0 12px rgba(42, 123, 131, 0.4);
+  color: #F5EDE2;
+  border: none;
+  padding: 1rem;
+  transition: transform 0.25s cubic-bezier(.4,1.6,.4,1), box-shadow 0.25s;
+  overflow: hidden;
+  will-change: transform;
+  width: 100%;
+}
+/* Track list container scroll fix */
+.track-list {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+.glow .num {
+  background: #F4ECE2;
+  color: #2A7B83;
+}
+
+.glow:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 32px -4px #2A7B83, 0 0 0 2px #F5EDE2, 0 0 12px rgba(42,123,131,0.4);
+}
+
+/* Vinyl Label style */
+.vinyl {
+  background: none;
+  border-left: 4px solid #E17858;
+  padding: 1rem;
+  color: #2A7B83;
+}
+.vinyl .num {
+  background: #E17858;
+  color: #E9E3D2;
+}
+
+/* Panel and label tokens */
+:root {
+  --bg: #E9E3D2;
+  --ink: #16213E;
+  --panel: #2F2F2F;
+  --teal: #2A7B83;
+  --teal-dark: #256B72;
+  --teal-deep: #1E5E64;
+  --cream: #F4ECE2;
+  --warm: #E17858;
+  --shadow: #9F9C91;
+}
+
+/* Utility classes for text and backgrounds */
+.text-panel {
+  color: var(--panel);
+}
+.text-ink {
+  color: var(--ink);
+}
+.text-teal {
+  color: var(--teal);
+}
+.text-warm {
+  color: var(--warm);
+}
+.bg-panel {
+  background: var(--panel);
+}
+.bg-cream {
+  background: var(--cream);
+}
+.bg-teal {
+  background: var(--teal);
+}
+.bg-warm {
+  background: var(--warm);
+}
+
+/* Emboss effect for panel labels */
+.emboss {
+  text-shadow: 0 2px 6px var(--shadow), 0 1px 0 #a4a39a;
+}

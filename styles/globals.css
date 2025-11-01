@@ -1,0 +1,73 @@
+/* Custom scrollbar for track-list */
+.track-list::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+.track-list::-webkit-scrollbar-thumb {
+  background: #bfbeb7;
+  border-radius: 8px;
+  border: 2px solid #E9E3D2;
+}
+.track-list::-webkit-scrollbar-thumb:hover {
+  background: #9ed9f0ff;
+}
+.track-list {
+  scrollbar-width: thin;
+  scrollbar-color: #bfbeb7 #E9E3D2;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: 'Montserrat', Arial, sans-serif !important;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Montserrat', Arial, sans-serif;
+  background-color: #0b0d10;
+  color: #ffffff;
+}
+
+/* Motion guard for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom utility classes */
+.noise-overlay {
+  background-image: url('/assets/textures/noise.png');
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+}
+
+.glass-effect {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reflection-highlight {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.1) 30%, 
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+}
