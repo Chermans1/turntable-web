@@ -39,23 +39,30 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
+  padding: 0 18px;
+  text-align: center;
   text-shadow: 0 0 8px rgba(255,183,77,0.6);
 }
 .display-header {
-  font-size: .9rem;
+  font-size: .72rem;
   color: var(--warm);
   letter-spacing: .15em;
   text-transform: uppercase;
   animation: colorPulse 6s ease-in-out infinite;
 }
 .display-track {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: #FFD166;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   animation: colorPulse 6s ease-in-out infinite;
 }
 .display-artist {
-  font-size: 1rem;
+  font-size: .74rem;
+  line-height: 1.3;
   opacity: .7;
   color: #FFE29A;
   animation: colorPulse 6s ease-in-out infinite;

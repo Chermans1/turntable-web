@@ -24,14 +24,18 @@ export default function HomePage() {
     if (isPlaying) {
       // Delay audio start to let tonearm "land" on record
       const playTimeout = setTimeout(() => {
-        audio.play().catch(() => {});
+        audio.play().catch((error) => {
+          console.error('Audio playback error:', error);
+          console.log('Attempted to play:', currentTrack.audioUrl);
+          setIsPlaying(false);
+        });
       }, 1500); // 1.5 second delay
       
       return () => clearTimeout(playTimeout);
     } else {
       audio.pause();
     }
-  }, [isPlaying, currentTrackIndex]);
+  }, [isPlaying, currentTrackIndex, currentTrack.audioUrl]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -41,16 +45,19 @@ export default function HomePage() {
   }, [volume]);
 
   const handleTrackSelect = (index: number) => {
+    console.log('Track selected:', index, tracks[index].title);
     setCurrentTrackIndex(index);
     setIsPlaying(true);
   };
 
   const handleNext = () => {
+    console.log('Next button clicked');
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
     setCurrentTrackIndex(nextIndex);
   };
 
   const handlePrev = () => {
+    console.log('Previous button clicked');
     const prevIndex = currentTrackIndex === 0 ? tracks.length - 1 : currentTrackIndex - 1;
     setCurrentTrackIndex(prevIndex);
   };
@@ -84,9 +91,9 @@ export default function HomePage() {
         </header>
 
         {/* Responsive Turntable Wrapper */}
-        <div className="turntable-responsive-wrapper w-full">
+        <div className="w-full">
           <div 
-            className="turntable-container relative mx-auto"
+            className="relative mx-auto"
             style={{
               width: '1280px',
               height: '817px',
@@ -257,7 +264,7 @@ export default function HomePage() {
                     <div className="text-teal-800 text-lg font-semibold tracking-tight truncate">
                       {track.title}
                     </div>
-                    <div className="text-teal-900/70 text-sm truncate">{track.artist}</div>
+                    <div className="text-teal-900/70 text-xs leading-snug">{track.artist}</div>
                   </div>
                 </button>
               ))}
@@ -339,7 +346,13 @@ export default function HomePage() {
                 </button>
 
                 {/* Play/Stop Button */}
-                <button onClick={() => setIsPlaying(!isPlaying)} className="hover:scale-105 transition-transform">
+                <button 
+                  onClick={() => {
+                    console.log('Play/Stop clicked. Current state:', isPlaying);
+                    setIsPlaying(!isPlaying);
+                  }} 
+                  className="hover:scale-105 transition-transform"
+                >
                   <div style={{ width: '39.97px', height: '45px' }} className="bg-accent rounded-lg flex items-center justify-center">
                     <img 
                       src={isPlaying ? "/assets/svg/stop-button.svg" : "/assets/svg/play-button.svg"}
@@ -433,6 +446,13 @@ export default function HomePage() {
           ref={audioRef} 
           src={currentTrack.audioUrl} 
           preload="metadata"
+          onError={(e) => {
+            console.error('Audio loading error:', e);
+            console.log('Failed to load:', currentTrack.audioUrl);
+          }}
+          onLoadedMetadata={() => {
+            console.log('Audio loaded:', currentTrack.audioUrl);
+          }}
           onEnded={() => {
             // Auto-play next track
             const nextIndex = (currentTrackIndex + 1) % tracks.length;
@@ -443,6 +463,20 @@ export default function HomePage() {
       </div>
 
       <style jsx>{`
+        .bg-follow {
+          background-color: #E9E3D2;
+          background-image:
+            radial-gradient(rgba(14,116,144,.15) 1px, transparent 1.5px),
+            radial-gradient(rgba(14,116,144,.08) 1px, transparent 1.5px),
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.05)),
+            radial-gradient(60% 20% at 50% 0%, rgba(255,255,255,.1), transparent);
+          background-size: 18px 18px, 36px 36px, 100% 100%, 100% 40%;
+          background-attachment: local, local, local, local;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .turntable-responsive-wrapper {
           width: 100%;
           max-width: 1280px;
@@ -473,73 +507,4 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-}
-
-function TrackItem({ 
-  track, 
-  index, 
-  isActive, 
-  isPlaying, 
-  onClick 
-}: { 
-  track: typeof tracks[0];
-  index: number;
-  isActive: boolean;
-  isPlaying: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${
-        isActive 
-          ? 'bg-accent/20 border border-accent/40' 
-          : 'bg-white/5 hover:bg-white/10 border border-transparent'
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        {/* Track Number or Playing Indicator */}
-        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-sm">
-          {isPlaying ? (
-            <div className="flex gap-1">
-              <div className="w-1 h-3 bg-accent animate-pulse"></div>
-              <div className="w-1 h-3 bg-accent animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-1 h-3 bg-accent animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-            </div>
-          ) : (
-            <span className="text-white/60">{index + 1}</span>
-          )}
-        </div>
-
-        {/* Track Info */}
-        <div className="flex-1 min-w-0">
-          <h4 className={`font-medium truncate ${isActive ? 'text-accent' : ''}`}>
-            {track.title}
-          </h4>
-          <p className="text-sm text-white/60 truncate">{track.artist}</p>
-        </div>
-
-        {/* Duration */}
-        {track.durationSec && (
-          <div className="text-xs text-white/40">
-            {formatDuration(track.durationSec)}
-          </div>
-        )}
-
-        {/* Color indicator */}
-        {track.color && (
-          <div 
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: track.color }}
-          />
-        )}
-      </div>
-    </button>
-  );
-}
-
-function formatDuration(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }

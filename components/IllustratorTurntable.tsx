@@ -7,6 +7,7 @@ type IllustratorTurntableProps = {
         title: string;
         artist: string;
         color?: string;
+        coverUrl?: string;
     };
     onTogglePlay: () => void;
 };
@@ -84,8 +85,9 @@ export default function IllustratorTurntable({
                         />
                     </div>
 
-                    {/* Record Label - Layer on top of label rim */}
-                    <div 
+                    {/* Record Label - coveret til låten er selve labelen.
+                        Roterer med platen. Faller tilbake til SVG uten cover. */}
+                    <div
                         className="absolute inset-0"
                         style={{
                             top: '50%',
@@ -95,15 +97,23 @@ export default function IllustratorTurntable({
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <img
-                            src="/assets/svg/record-lable.svg"
-                            alt="Record Label"
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                                console.log('Record label SVG not found');
-                                e.currentTarget.style.display = 'none';
-                            }}
-                        />
+                        {currentTrack.coverUrl ? (
+                            <img
+                                src={currentTrack.coverUrl}
+                                alt={`Cover: ${currentTrack.title}`}
+                                className="w-full h-full object-cover rounded-full"
+                            />
+                        ) : (
+                            <img
+                                src="/assets/svg/record-lable.svg"
+                                alt="Record Label"
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                    console.log('Record label SVG not found');
+                                    e.currentTarget.style.display = 'none';
+                                }}
+                            />
+                        )}
                     </div>
                 </motion.div>
 
