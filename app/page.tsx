@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { tracks } from '@/data/tracks';
 import '../styles/track-cards.css';
 import '../styles/spiller-na-panel.css';
@@ -9,13 +9,60 @@ import TurntableControls from '@/components/TurntableControls';
 import AudioBar from '@/components/AudioBar';
 import AudioVisualizer from '@/components/AudioVisualizer';
 
+// Kalibrering: hvor mange grader tonearmen vandrer fra ytterspor til
+// innerspor gjennom en hel låt. Testes live med ?utslag=14 i URL-en,
+// og ?test=1 låser armen i sluttposisjon for statisk kalibrering.
+const STANDARD_SPOR_UTSLAG = 15; // kalibrert visuelt 20. juli 2026
+
 export default function HomePage() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
+  const [fremdrift, setFremdrift] = useState(0); // 0-1 gjennom låten
   const audioRef = useRef<HTMLAudioElement>(null);
+  const reduserBevegelse = useReducedMotion();
+
+  // Kalibreringsoverstyringer fra URL (kun for utvikling)
+  const [sporUtslag] = useState(() => {
+    if (typeof window === 'undefined') return STANDARD_SPOR_UTSLAG;
+    const p = new URLSearchParams(window.location.search).get('utslag');
+    return p ? parseFloat(p) : STANDARD_SPOR_UTSLAG;
+  });
+  const [testSlutt] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('test') === '1';
+  });
 
   const currentTrack = tracks[currentTrackIndex];
+
+  // Tonearmen følger avspillingen: nettleseren vet både lengde (duration)
+  // og posisjon (currentTime), så fremdriften er alltid riktig per låt.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const oppdater = () => {
+      if (audio.duration && isFinite(audio.duration) && audio.duration > 0) {
+        setFremdrift(audio.currentTime / audio.duration);
+      }
+    };
+    audio.addEventListener('timeupdate', oppdater);
+    return () => audio.removeEventListener('timeupdate', oppdater);
+  }, []);
+
+  // Ny låt: armen skal ut til startsporet igjen
+  useEffect(() => {
+    setFremdrift(0);
+  }, [currentTrackIndex]);
+
+  // Armens vandring innover: 0 grader ved ytterspor, sporUtslag ved innerspor.
+  // Reduced motion: armen lander, men sporer ikke.
+  const vandring = testSlutt
+    ? sporUtslag
+    : reduserBevegelse
+      ? 0
+      : Math.min(fremdrift, 1) * sporUtslag;
+  const baseVinkel = testSlutt ? 30 + vandring : isPlaying ? 30 + vandring : 0;
+  const armVinkel = testSlutt ? 21 + vandring : isPlaying ? 21 + vandring : 0;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -74,18 +121,21 @@ export default function HomePage() {
     <main 
       className="min-h-screen p-4 md:p-8 relative flex items-center justify-center overflow-x-hidden"
       style={{
+        // Papir-krem fra christianhermansen.no, med varm gull-glød
         background: `
-          linear-gradient(135deg, #f4f1e8 0%, #e8e5dc 25%, #f1ede4 50%, #e5e2d9 75%, #f4f1e8 100%),
-          radial-gradient(circle at 25% 25%, rgba(139, 121, 94, 0.05) 0%, transparent 50%),
-          radial-gradient(circle at 75% 75%, rgba(139, 121, 94, 0.05) 0%, transparent 50%)
-        `,
-        backgroundSize: '200px 200px, 300px 300px, 250px 250px'
+          radial-gradient(ellipse 70% 55% at 50% -10%, rgba(217, 146, 60, 0.14), transparent 70%),
+          radial-gradient(circle at 75% 85%, rgba(168, 67, 42, 0.05) 0%, transparent 55%),
+          linear-gradient(135deg, #f1e7d3 0%, #ece0c9 50%, #f1e7d3 100%)
+        `
       }}
     >      
       <div className="w-full max-w-[1280px] mx-auto relative z-10">
         {/* Header */}
         <header className="mb-6 hidden md:block text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-800 drop-shadow-sm">
+          <h1
+            className="text-4xl font-bold tracking-tight drop-shadow-sm display-font"
+            style={{ color: '#24494e' }}
+          >
             Digital Music Showcase
           </h1>
         </header>
@@ -154,10 +204,10 @@ export default function HomePage() {
                 src="/assets/svg/tonearm-base.svg" 
                 alt="Tonearm Base"
                 className="w-32 h-auto object-contain"
-                animate={{ 
-                  rotate: isPlaying ? 30 : 0 
+                animate={{
+                  rotate: baseVinkel
                 }}
-                transition={{ 
+                transition={{
                   duration: 0.8,
                   ease: "easeInOut"
                 }}
@@ -188,8 +238,8 @@ export default function HomePage() {
                   x: '-50%',
                   y: '-50%'
                 }}
-                animate={{ 
-                  rotate: isPlaying ? 21 : 0,
+                animate={{
+                  rotate: armVinkel,
                   x: '-50%',
                   y: '-50%'
                 }}
@@ -220,13 +270,13 @@ export default function HomePage() {
           }}
         >
           <h3
-            className="text-2xl font-bold emboss"
+            className="text-2xl font-bold emboss display-font"
             style={{
-              color: '#5a7587ff',
+              color: '#24494e',
               textShadow: '0 2px 6px #9F9C91, 0 1px 0 #a4a39aff'
             }}
           >
-            LÅTER  <span className="text-teal-800">{tracks.length}</span>
+            LÅTER  <span style={{ color: '#a8432a' }}>{tracks.length}</span>
           </h3>
         </div>
 
@@ -464,10 +514,12 @@ export default function HomePage() {
 
       <style jsx>{`
         .bg-follow {
-          background-color: #E9E3D2;
+          /* Gjennomsiktig så terracotta-panelet bak kortene synes -
+             originaldesignet. Prikkene ligger som subtil tekstur oppå. */
+          background-color: transparent;
           background-image:
-            radial-gradient(rgba(14,116,144,.15) 1px, transparent 1.5px),
-            radial-gradient(rgba(14,116,144,.08) 1px, transparent 1.5px),
+            radial-gradient(rgba(244,236,226,.28) 1px, transparent 1.5px),
+            radial-gradient(rgba(244,236,226,.16) 1px, transparent 1.5px),
             linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.05)),
             radial-gradient(60% 20% at 50% 0%, rgba(255,255,255,.1), transparent);
           background-size: 18px 18px, 36px 36px, 100% 100%, 100% 40%;

@@ -28,6 +28,13 @@
   font-family: 'Montserrat', Arial, sans-serif !important;
 }
 
+/* Display-font for overskrifter. Trenger !important for å slå
+   universalregelen over (som ellers overstyrer selv inline-stiler). */
+.display-font,
+.display-font * {
+  font-family: var(--font-fraunces), Georgia, serif !important;
+}
+
 html,
 body {
   max-width: 100vw;
