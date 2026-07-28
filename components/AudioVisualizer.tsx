@@ -1,32 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 
+// Et HTMLMediaElement kan bare kobles til ÉN MediaElementSourceNode -
+// noensinne. Med både skrivebords- og mobilvisualizer på siden (og hot
+// reload i dev) må lydgrafen derfor lages én gang og gjenbrukes.
+// Grafen lagres på selve lydelementet så den overlever module-reload.
+type LydGraf = { ctx: AudioContext; analyser: AnalyserNode };
+
+function hentDeltLydgraf(audio: HTMLAudioElement): LydGraf {
+  const lager = audio as HTMLAudioElement & { __lydgraf?: LydGraf };
+  if (!lager.__lydgraf) {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 128;
+    const source = ctx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
+    lager.__lydgraf = { ctx, analyser };
+  }
+  return lager.__lydgraf;
+}
+
 export default function AudioVisualizer({ audio, bars = 5, color = "#FFD166" }: { audio: HTMLAudioElement | null; bars?: number; color?: string }) {
   const [levels, setLevels] = useState<number[]>(Array(bars).fill(0));
-  const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
-  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   useEffect(() => {
     if (!audio) return;
-    let ctx: AudioContext | null = null;
-    let analyser: AnalyserNode | null = null;
-    let source: MediaElementAudioSourceNode | null = null;
     let running = true;
 
-    ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    analyser = ctx.createAnalyser();
-    analyser.fftSize = 128; // More detailed
-    source = ctx.createMediaElementSource(audio);
-    source.connect(analyser);
-    analyser.connect(ctx.destination);
-    analyserRef.current = analyser;
-    sourceRef.current = source;
+    const { ctx, analyser } = hentDeltLydgraf(audio);
+    // Autoplay-policy kan la konteksten stå suspendert til første trykk
+    const vekk = () => { if (ctx.state === "suspended") ctx.resume(); };
+    audio.addEventListener("play", vekk);
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     function animate() {
       if (!running) return;
-      analyser!.getByteFrequencyData(dataArray);
+      analyser.getByteFrequencyData(dataArray);
       // Split into N bars
       const step = Math.floor(dataArray.length / bars);
       const newLevels = Array(bars)
@@ -44,11 +55,10 @@ export default function AudioVisualizer({ audio, bars = 5, color = "#FFD166" }: 
     animate();
 
     return () => {
+      // Kun stopp animasjonen - lydgrafen er delt og skal leve videre
       running = false;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (analyser) analyser.disconnect();
-      if (source) source.disconnect();
-      if (ctx) ctx.close();
+      audio.removeEventListener("play", vekk);
     };
   }, [audio, bars]);
 

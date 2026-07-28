@@ -69,14 +69,18 @@ export default function HomePage() {
     if (!audio) return;
     
     if (isPlaying) {
-      // Delay audio start to let tonearm "land" on record
+      // Desktop: vent på at tonearmen "lander" på platen.
+      // Mobil: ingen arm, så lyden starter nesten umiddelbart.
+      const harTonearm =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(min-width: 1024px)').matches;
       const playTimeout = setTimeout(() => {
         audio.play().catch((error) => {
           console.error('Audio playback error:', error);
           console.log('Attempted to play:', currentTrack.audioUrl);
           setIsPlaying(false);
         });
-      }, 1500); // 1.5 second delay
+      }, harTonearm ? 1500 : 150);
       
       return () => clearTimeout(playTimeout);
     } else {
@@ -95,6 +99,14 @@ export default function HomePage() {
     console.log('Track selected:', index, tracks[index].title);
     setCurrentTrackIndex(index);
     setIsPlaying(true);
+  };
+
+  // Ekte stopp (mobil): pause + spole tilbake til start
+  const handleStop = () => {
+    const audio = audioRef.current;
+    if (audio) audio.currentTime = 0;
+    setFremdrift(0);
+    setIsPlaying(false);
   };
 
   const handleNext = () => {
@@ -130,6 +142,7 @@ export default function HomePage() {
       }}
     >      
       <div className="w-full max-w-[1280px] mx-auto relative z-10">
+        <div className="skrivebord">
         {/* Header */}
         <header className="mb-6 hidden md:block text-center">
           <h1
@@ -487,8 +500,173 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          
+
         </div>
+        </div>
+        </div>
+
+        {/* Mobil: buevindu + stablede paneler.
+            Fase 1 av formatskiftet - kassettdekk kommer på mellombredde. */}
+        <div className="mobil-spiller w-full max-w-[480px] mx-auto flex flex-col gap-4">
+
+          {/* Buevindu: coveret til låten som spilles, bak tonet glass */}
+          <div className="w-full">
+            <svg
+              viewBox="0 0 786.31 352.83"
+              className="w-full h-auto drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
+              role="img"
+              aria-label={`Cover: ${currentTrack.title}`}
+            >
+              <defs>
+                <clipPath id="bue-vindu">
+                  <path d="M44.24,326.42c-8.53,0-14.86-7.95-12.89-16.24,2.43-10.25,5.94-22.42,10.9-36.16,11.33-31.33,32.87-78.15,71.17-123.25,31.56-37.18,68.98-66.52,111.2-87.21,50.3-24.64,107.87-37.14,171.12-37.14,114.32,0,206.36,38.73,273.55,115.12,40.27,45.77,62.65,95.35,74.34,128.87,5.29,15.18,8.98,28.64,11.48,39.89,1.84,8.27-4.44,16.12-12.92,16.12H44.24Z" />
+                </clipPath>
+                {/* Selve CD-trykket: coveret klippet til skiven, med
+                    mørk ytterkant fra turntabel_CD.svg synlig som rand */}
+                <clipPath id="cd-trykk">
+                  <circle cx="393.15" cy="391.5" r="322" />
+                </clipPath>
+              </defs>
+              {/* Vinduet er et innblikk til CD-en: bare toppen av skiven
+                  synes, resten forsvinner bak dekket */}
+              <g clipPath="url(#bue-vindu)">
+                {/* Mørkt kammer bak skiven */}
+                <rect x="31" y="26" width="725" height="301" fill="#1E1E1E" />
+                {/* CD-en roterer når musikken spiller */}
+                <g className={`cd-rotor${isPlaying && !reduserBevegelse ? ' spinner' : ''}`}>
+                  {/* Skiven (turntabel_CD.svg: r 340.75, #39352f) */}
+                  <circle cx="393.15" cy="391.5" r="340.75" fill="#39352f" />
+                  <image
+                    href={currentTrack.coverUrl}
+                    x="52.4"
+                    y="50.75"
+                    width="681.5"
+                    height="681.5"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath="url(#cd-trykk)"
+                  />
+                  {/* Nav og hull i midten */}
+                  <circle cx="393.15" cy="391.5" r="78" fill="rgba(30,30,30,0.55)" stroke="rgba(255,255,255,0.18)" strokeWidth="2" />
+                  <circle cx="393.15" cy="391.5" r="40" fill="#1E1E1E" stroke="rgba(255,255,255,0.25)" strokeWidth="2" />
+                </g>
+              </g>
+              {/* Rammen (fra turntabel_glass.svg) */}
+              <path
+                d="M395.74,1.42C70.24,1.42-7.76,312.42,2.24,351.42h782C792.24,319.42,730.24,1.42,395.74,1.42ZM44.24,326.42c-8.53,0-14.86-7.95-12.89-16.24,2.43-10.25,5.94-22.42,10.9-36.16,11.33-31.33,32.87-78.15,71.17-123.25,31.56-37.18,68.98-66.52,111.2-87.21,50.3-24.64,107.87-37.14,171.12-37.14,114.32,0,206.36,38.73,273.55,115.12,40.27,45.77,62.65,95.35,74.34,128.87,5.29,15.18,8.98,28.64,11.48,39.89,1.84,8.27-4.44,16.12-12.92,16.12H44.24Z"
+                fill="#463c3b"
+                stroke="#000"
+                strokeMiterlimit={10}
+                strokeWidth={2.83}
+              />
+              {/* Glasstonen over coveret - lettere enn originalens 50 %
+                  så nattescenene fortsatt synes */}
+              <path
+                d="M44.24,326.42c-8.53,0-14.86-7.95-12.89-16.24,2.43-10.25,5.94-22.42,10.9-36.16,11.33-31.33,32.87-78.15,71.17-123.25,31.56-37.18,68.98-66.52,111.2-87.21,50.3-24.64,107.87-37.14,171.12-37.14,114.32,0,206.36,38.73,273.55,115.12,40.27,45.77,62.65,95.35,74.34,128.87,5.29,15.18,8.98,28.64,11.48,39.89,1.84,8.27-4.44,16.12-12.92,16.12H44.24Z"
+                fill="#463c3b"
+                opacity={0.28}
+                stroke="#000"
+                strokeMiterlimit={10}
+                strokeWidth={2.83}
+              />
+            </svg>
+          </div>
+
+          {/* LÅTER-etikett */}
+          <div className="flex justify-end px-1">
+            <h2
+              className="text-xl font-bold display-font"
+              style={{
+                color: '#24494e',
+                textShadow: '0 2px 6px #9F9C91, 0 1px 0 #a4a39aff',
+              }}
+            >
+              LÅTER <span style={{ color: '#a8432a' }}>{tracks.length}</span>
+            </h2>
+          </div>
+
+          {/* Låtliste - samme terracotta-panel som skrivebordet */}
+          <div
+            className="relative w-full"
+            style={{
+              height: '340px',
+              background: '#E17858',
+              borderRadius: '1.5rem',
+              border: '2px solid #9ed9f0',
+              boxShadow:
+                'inset 0 18px 40px -10px rgba(0,0,0,.35),0 6px 24px rgba(0,0,0,.15)',
+              overflow: 'hidden',
+            }}
+          >
+            <div className="absolute inset-x-0 top-0 h-10 pointer-events-none bg-gradient-to-b from-black/10 to-transparent z-10" />
+            <div className="track-list h-full w-full overflow-y-auto px-3 py-4 space-y-3 bg-follow no-scrollbar">
+              {tracks.map((track, index) => (
+                <button
+                  key={track.slug}
+                  type="button"
+                  onClick={() => handleTrackSelect(index)}
+                  className="group w-full text-left relative rounded-2xl px-4 py-4 bg-[#f6f0df] border border-teal-700/30 shadow-[0_6px_0_rgba(20,100,110,.25)] flex gap-4 items-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
+                  <div className={`grid place-items-center w-10 h-10 shrink-0 rounded-full font-bold ${index === currentTrackIndex ? 'active-num' : 'bg-teal-800 text-white'}`}>
+                    {index + 1}
+                  </div>
+                  <div className="leading-tight min-w-0">
+                    <div className="text-teal-800 text-base font-semibold tracking-tight truncate">
+                      {track.title}
+                    </div>
+                    <div className="text-teal-900/70 text-xs leading-snug">{track.artist}</div>
+                  </div>
+                </button>
+              ))}
+              <div className="h-2" />
+            </div>
+            <div className="absolute inset-0 rounded-3xl pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.25)' }} />
+          </div>
+
+          {/* Spiller Nå */}
+          <div className="display-panel">
+            <div className="glass"></div>
+            <div className="display-content">
+              <div className="display-header">Spiller Nå</div>
+              <div className="display-track">{currentTrack.title}</div>
+              <div className="display-artist">{currentTrack.artist}</div>
+            </div>
+          </div>
+
+          {/* Visualizer */}
+          <div className="display-panel" style={{ height: '96px' }}>
+            <div className="glass"></div>
+            <div className="absolute inset-0 flex items-end justify-center pb-5">
+              <AudioVisualizer audio={audioRef.current} bars={12} color="#FFD166" />
+            </div>
+          </div>
+
+          {/* Transport: forrige, stopp, spill, neste */}
+          <div className="flex items-center justify-center gap-5 py-2">
+            <button onClick={handlePrev} aria-label="Forrige låt" className="active:scale-95 transition-transform">
+              <div style={{ width: '52px', height: '58px' }} className="bg-gray-700 rounded-lg flex items-center justify-center">
+                <img src="/assets/svg/previous-button.svg" alt="" className="w-full h-full" />
+              </div>
+            </button>
+            <button onClick={handleStop} aria-label="Stopp" className="active:scale-95 transition-transform">
+              <div style={{ width: '52px', height: '58px', opacity: isPlaying ? 1 : 0.55 }} className="bg-gray-700 rounded-lg flex items-center justify-center">
+                <img src="/assets/svg/stop-button.svg" alt="" className="w-full h-full" />
+              </div>
+            </button>
+            <button
+              onClick={() => setIsPlaying(true)}
+              aria-label="Spill av"
+              className="active:scale-95 transition-transform"
+            >
+              <div style={{ width: '52px', height: '58px', opacity: isPlaying ? 0.55 : 1 }} className="bg-accent rounded-lg flex items-center justify-center">
+                <img src="/assets/svg/play-button.svg" alt="" className="w-full h-full" />
+              </div>
+            </button>
+            <button onClick={handleNext} aria-label="Neste låt" className="active:scale-95 transition-transform">
+              <div style={{ width: '52px', height: '58px' }} className="bg-gray-700 rounded-lg flex items-center justify-center">
+                <img src="/assets/svg/next-button.svg" alt="" className="w-full h-full" />
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Hidden Audio Element */}
@@ -528,6 +706,27 @@ export default function HomePage() {
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* CD-en i buevinduet: roterer rundt eget sentrum når det spilles,
+           fryser der den er ved pause */
+        .cd-rotor {
+          transform-box: view-box;
+          transform-origin: 393.15px 391.5px;
+          animation: cdSpin 2.2s linear infinite;
+          animation-play-state: paused;
+        }
+        .cd-rotor.spinner { animation-play-state: running; }
+        @keyframes cdSpin { to { transform: rotate(360deg); } }
+
+        /* Formatskifte: platespiller på stor skjerm, stablet mobilvisning
+           under 1024px. (Kassettdekk på mellombredde kommer som fase 2.) */
+        .skrivebord { display: none; }
+        .mobil-spiller { display: flex; }
+        .mobil-spiller :global(.display-panel) { width: 100%; }
+        @media (min-width: 1024px) {
+          .skrivebord { display: block; }
+          .mobil-spiller { display: none; }
+        }
 
         .turntable-responsive-wrapper {
           width: 100%;
