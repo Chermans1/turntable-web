@@ -52,6 +52,16 @@ export const tracks: Track[] = [
     description: "Til kompisane som forsvant. Regnet husker dem.",
   },
   {
+    slug: "mens-dokker-har-det",
+    title: "Mens dokker har det",
+    artist: "Tekst: Christian Hermansen · Produsert i Suno",
+    color: "#d9923c",
+    audioUrl: "/audio/mens-dokker-har-det.mp3",
+    coverUrl: "/covers/mens-dokker-har-det.webp",
+    description:
+      "Ingen ser den siste gangen før den e forbi. Til gjengen som ennå har det.",
+  },
+  {
     slug: "alt-eg-har-e-pa-lan",
     title: "Alt Eg Har E På Lån",
     artist: "Tekst: Christian Hermansen · Produsert i Suno",
@@ -80,6 +90,16 @@ export const tracks: Track[] = [
     coverUrl: "/covers/nar-morket-banker-pa.webp",
     description:
       "Om å le av troen hele livet, helt til mørket banker på døren.",
+  },
+  {
+    slug: "nor-regnet-faller",
+    title: "Når Regnet Faller",
+    artist: "Tekst: Christian Hermansen · Produsert i Suno",
+    color: "#1d3c41",
+    audioUrl: "/audio/nor-regnet-faller.mp3",
+    coverUrl: "/covers/nor-regnet-faller.webp",
+    description:
+      "Savn i sølvgrått regn - byen ved din side, ett skritt, og så et te.",
   },
   {
     slug: "hold-fast",
