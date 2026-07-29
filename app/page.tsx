@@ -6,6 +6,7 @@ import '../styles/track-cards.css';
 import '../styles/spiller-na-panel.css';
 import IllustratorTurntable from '@/components/IllustratorTurntable';
 import TurntableControls from '@/components/TurntableControls';
+import CassetteDeck from '@/components/CassetteDeck';
 import AudioBar from '@/components/AudioBar';
 import AudioVisualizer from '@/components/AudioVisualizer';
 
@@ -509,8 +510,18 @@ export default function HomePage() {
             Fase 1 av formatskiftet - kassettdekk kommer på mellombredde. */}
         <div className="mobil-spiller w-full max-w-[480px] mx-auto flex flex-col gap-4">
 
-          {/* Buevindu: coveret til låten som spilles, bak tonet glass */}
-          <div className="w-full">
+          {/* Mellombredde (768-1024): MC-kassetten */}
+          <div className="mc-visning">
+            <CassetteDeck
+              isPlaying={isPlaying}
+              fremdrift={fremdrift}
+              reduserBevegelse={reduserBevegelse}
+              title={currentTrack.title}
+            />
+          </div>
+
+          {/* Buevindu: CD-en bak tonet glass */}
+          <div className="w-full bue-visning">
             <svg
               viewBox="0 0 786.31 352.83"
               className="w-full h-auto drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
@@ -718,11 +729,17 @@ export default function HomePage() {
         .cd-rotor.spinner { animation-play-state: running; }
         @keyframes cdSpin { to { transform: rotate(360deg); } }
 
-        /* Formatskifte: platespiller på stor skjerm, stablet mobilvisning
-           under 1024px. (Kassettdekk på mellombredde kommer som fase 2.) */
+        /* Formatskifte: platespiller på stor skjerm, MC-kassett på
+           mellombredde, CD i buevindu på mobil. */
         .skrivebord { display: none; }
         .mobil-spiller { display: flex; }
         .mobil-spiller :global(.display-panel) { width: 100%; }
+        .mc-visning { display: none; }
+        @media (min-width: 768px) {
+          .bue-visning { display: none; }
+          .mc-visning { display: block; }
+          .mobil-spiller { max-width: 40rem; }
+        }
         @media (min-width: 1024px) {
           .skrivebord { display: block; }
           .mobil-spiller { display: none; }
