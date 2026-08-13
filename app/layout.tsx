@@ -2,6 +2,7 @@ import '../styles/globals.css'
 import type { Metadata, Viewport } from 'next'
 import React from 'react'
 import { Fraunces } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 
 // Selv-hostet via next/font - samme display-font som christianhermansen.no
 const fraunces = Fraunces({
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className={`min-h-screen bg-bg text-ink antialiased ${fraunces.variable}`}>
         <div className="noise-overlay fixed inset-0 pointer-events-none" />
         {children}
+        <Analytics />
       </body>
     </html>
   )
