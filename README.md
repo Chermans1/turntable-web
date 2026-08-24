@@ -126,3 +126,7 @@ Eller deploy til andre plattformer som støtter Next.js.
 ---
 
 *Laget med ❤️ for musikkelskere*
+
+## Rettigheter
+
+Musikken (tekstene og innspillingene i `public/audio/` og covrene i `public/covers/`) er © Christian Hermansen. Alle rettigheter forbeholdt - den er ikke lisensiert for gjenbruk, remixing eller redistribusjon. Koden kan du gjerne la deg inspirere av.
