@@ -18,20 +18,20 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Turntable Web - Digital Music Showcase',
-  description: 'En retro-futuristisk musikk-showcase som presenterer dine låter gjennom en interaktiv platespiller-UI.',
-  keywords: ['musikk', 'synthwave', 'turntable', 'digital', 'retro-futuristic'],
+  title: 'Turntable - interaktiv platespiller',
+  description: 'En illustrert platespiller som bytter format med skjermen: vinyl, kassett og CD. Låtene er demoinnhold, tekster av Christian Hermansen, produsert i Suno.',
+  keywords: ['musikk', 'platespiller', 'turntable', 'interaktiv', 'retro'],
   authors: [{ name: 'Christian Hermansen' }],
   openGraph: {
     type: 'website',
-    title: 'Turntable Web - Digital Music Showcase',
-    description: 'En retro-futuristisk musikk-showcase som presenterer dine låter gjennom en interaktiv platespiller-UI.',
-    siteName: 'Turntable Web',
+    title: 'Turntable - interaktiv platespiller',
+    description: 'En illustrert platespiller som bytter format med skjermen: vinyl, kassett og CD. Låtene er demoinnhold, tekster av Christian Hermansen, produsert i Suno.',
+    siteName: 'Turntable',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Turntable Web - Digital Music Showcase',
-    description: 'En retro-futuristisk musikk-showcase som presenterer dine låter gjennom en interaktiv platespiller-UI.',
+    title: 'Turntable - interaktiv platespiller',
+    description: 'En illustrert platespiller som bytter format med skjermen: vinyl, kassett og CD. Låtene er demoinnhold, tekster av Christian Hermansen, produsert i Suno.',
   },
 }
 

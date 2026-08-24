@@ -150,7 +150,7 @@ export default function HomePage() {
             className="text-4xl font-bold tracking-tight drop-shadow-sm display-font"
             style={{ color: '#24494e' }}
           >
-            Digital Music Showcase
+            Turntable
           </h1>
         </header>
 
